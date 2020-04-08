@@ -377,7 +377,8 @@ bool Param::ValueFromString(const std::string &_value)
       try {
         StringStreamClassicLocale ss(tmp);
         ss >> colortmp;
-      } catch (const std::ios_base::failure &_e)
+      }
+      catch(const std::ios_base::failure &_e)
       {
         StringStreamClassicLocale ss(tmp + " " + std::to_string(colortmp.A()));
         ss >> colortmp;
@@ -452,7 +453,7 @@ bool Param::ValueFromString(const std::string &_value)
            << this->dataPtr->key << "].\n";
     return false;
   }
-  catch (const std::ios_base::failure &_e)
+  catch(const std::ios_base::failure &_e)
   {
     sdferr << "Unknown error. Unable to set value ["
            << _value << " ] for key["

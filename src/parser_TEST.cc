@@ -51,7 +51,7 @@ TEST(parser, initStringTrim)
 
 /////////////////////////////////////////////////
 /// Check that _a contains _b
-static bool contains(const std::string _a, const std::string _b)
+static bool contains(const std::string &_a, const std::string &_b)
 {
   return _a.find(_b) != std::string::npos;
 }
