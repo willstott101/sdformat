@@ -44,12 +44,14 @@ namespace sdf
     public: explicit StringStreamClassicLocale()
     {
       this->imbue(std::locale::classic());
+      this->exceptions(std::stringstream::failbit);
     }
 
     public: explicit StringStreamClassicLocale(const std::string& str)
       : std::stringstream(str)
     {
       this->imbue(std::locale::classic());
+      this->exceptions(std::stringstream::failbit);
     }
   };
   }
@@ -366,10 +368,20 @@ bool Param::ValueFromString(const std::string &_value)
     else if (this->dataPtr->typeName == "ignition::math::Color" ||
              this->dataPtr->typeName == "color")
     {
-      StringStreamClassicLocale ss(tmp);
       ignition::math::Color colortmp;
 
-      ss >> colortmp;
+      // The insertion operator (>>) expects 4 values, but the last value (the
+      // alpha) is optional. We first try to parse assuming the alpha is
+      // specified. If that fails, we append the default value of alpha to the
+      // string and try to parse again.
+      try {
+        StringStreamClassicLocale ss(tmp);
+        ss >> colortmp;
+      } catch (const std::ios_base::failure &_e)
+      {
+        StringStreamClassicLocale ss(tmp + " " + std::to_string(colortmp.A()));
+        ss >> colortmp;
+      }
       this->dataPtr->value = colortmp;
     }
     else if (this->dataPtr->typeName == "ignition::math::Vector2i" ||
@@ -439,6 +451,12 @@ bool Param::ValueFromString(const std::string &_value)
            << _value << " ] for key["
            << this->dataPtr->key << "].\n";
     return false;
+  }
+  catch (const std::ios_base::failure &_e)
+  {
+    sdferr << "Unknown error. Unable to set value ["
+           << _value << " ] for key["
+           << this->dataPtr->key << "]\n";
   }
 
   return true;

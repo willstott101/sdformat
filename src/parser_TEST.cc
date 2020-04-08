@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include "sdf/parser.hh"
 #include "sdf/Element.hh"
+#include "test_config.h"
 
 /////////////////////////////////////////////////
 TEST(parser, initStringTrim)
@@ -46,6 +47,59 @@ TEST(parser, initStringTrim)
   sdf::ParamPtr attr = root->GetAttribute("name");
   EXPECT_TRUE(attr != nullptr);
   EXPECT_TRUE(attr->GetRequired());
+}
+
+/////////////////////////////////////////////////
+/// Check that _a contains _b
+static bool contains(const std::string _a, const std::string _b)
+{
+  return _a.find(_b) != std::string::npos;
+}
+
+/////////////////////////////////////////////////
+TEST(Parser, SyntaxErrorInValues)
+{
+  std::string pathBase = PROJECT_SOURCE_PATH;
+  pathBase += "/test/sdf";
+
+  // Capture sdferr output
+  std::stringstream buffer;
+  auto old = std::cerr.rdbuf(buffer.rdbuf());
+
+  {
+    std::string path = pathBase +"/bad_syntax_pose.sdf";
+    sdf::SDFPtr sdf(new sdf::SDF());
+    sdf::init(sdf);
+
+    sdf::readFile(path, sdf);
+    EXPECT_PRED2(contains, buffer.str(),
+                 "Unable to set value [bad 0 0 0 0 0 ] for key[pose]");
+  }
+  {
+    // clear the contents of the buffer
+    buffer.str("");
+    std::string path = pathBase +"/bad_syntax_double.sdf";
+    sdf::SDFPtr sdf(new sdf::SDF());
+    sdf::init(sdf);
+
+    sdf::readFile(path, sdf);
+    EXPECT_PRED2(contains, buffer.str(),
+                 "Unable to set value [bad ] for key[linear]");
+  }
+  {
+    // clear the contents of the buffer
+    buffer.str("");
+    std::string path = pathBase +"/bad_syntax_vector.sdf";
+    sdf::SDFPtr sdf(new sdf::SDF());
+    sdf::init(sdf);
+
+    sdf::readFile(path, sdf);
+    EXPECT_PRED2(contains, buffer.str(),
+                 "Unable to set value [0 1 bad ] for key[gravity]");
+  }
+
+  // Revert cerr rdbug so as to not interfere with other tests
+  std::cerr.rdbuf(old);
 }
 
 /////////////////////////////////////////////////
