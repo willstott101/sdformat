@@ -38,8 +38,8 @@ std::string convertUrdfStrToSdfStr(const std::string &_urdf)
   SDF_SUPPRESS_DEPRECATED_BEGIN
   sdf::URDF2SDF parser_;
   SDF_SUPPRESS_DEPRECATED_END
-  TiXmlDocument sdf_result = parser_.InitModelString(_urdf);
-  TiXmlPrinter printer;
+  tinyxml2::XMLDocument sdf_result = parser_.InitModelString(_urdf);
+  tinyxml2::XMLPrinter printer;
   sdf_result.Accept(&printer);
   return printer.Str();
 }
@@ -57,9 +57,9 @@ TEST(URDFParser, InitModelDoc_EmptyDoc_NoThrow)
   // Suppress deprecation for sdf::URDF2SDF
   SDF_SUPPRESS_DEPRECATED_BEGIN
   ASSERT_NO_THROW(
-    TiXmlDocument doc = TiXmlDocument();
+    tinyxml2::XMLDocument doc = tinyxml2::XMLDocument();
     sdf::URDF2SDF parser_;
-    TiXmlDocument sdf_result = parser_.InitModelDoc(&doc);
+    tinyxml2::XMLDocument sdf_result = parser_.InitModelDoc(&doc);
   );    // NOLINT(whitespace/parens)
   SDF_SUPPRESS_DEPRECATED_END
 }
@@ -70,10 +70,10 @@ TEST(URDFParser, InitModelDoc_BasicModel_NoThrow)
   // Suppress deprecation for sdf::URDF2SDF
   SDF_SUPPRESS_DEPRECATED_BEGIN
   ASSERT_NO_THROW(
-    TiXmlDocument doc;
+    tinyxml2::XMLDocument doc;
     doc.Parse(getMinimalUrdfTxt().c_str());
     sdf::URDF2SDF parser_;
-    TiXmlDocument sdf_result = parser_.InitModelDoc(&doc);
+    tinyxml2::XMLDocument sdf_result = parser_.InitModelDoc(&doc);
   );    // NOLINT(whitespace/parens)
   SDF_SUPPRESS_DEPRECATED_END
 }
@@ -82,12 +82,12 @@ TEST(URDFParser, InitModelDoc_BasicModel_NoThrow)
 TEST(URDFParser, ParseResults_BasicModel_ParseEqualToModel)
 {
   // URDF -> SDF
-  TiXmlDocument doc;
+  tinyxml2::XMLDocument doc;
   doc.Parse(getMinimalUrdfTxt().c_str());
   SDF_SUPPRESS_DEPRECATED_BEGIN
   sdf::URDF2SDF parser_;
   SDF_SUPPRESS_DEPRECATED_END
-  TiXmlDocument sdf_result = parser_.InitModelDoc(&doc);
+  tinyxml2::XMLDocument sdf_result = parser_.InitModelDoc(&doc);
   std::string sdf_result_str;
   sdf_result_str << sdf_result;
 
@@ -97,7 +97,7 @@ TEST(URDFParser, ParseResults_BasicModel_ParseEqualToModel)
   stream << "<sdf version='" << "1.7" << "'>"
          << "  <model name='test_robot' />"
          << "</sdf>";
-  TiXmlDocument sdf_doc;
+  tinyxml2::XMLDocument sdf_doc;
   sdf_doc.Parse(stream.str().c_str());
   std::string sdf_same_result_str;
   sdf_same_result_str << sdf_doc;
@@ -113,17 +113,17 @@ TEST(URDFParser, ParseRobotOriginXYZBlank)
          << "  <origin />"
          << "  <link name=\"link\" />"
          << "</robot>";
-  TiXmlDocument doc;
+  tinyxml2::XMLDocument doc;
   doc.Parse(stream.str().c_str());
   SDF_SUPPRESS_DEPRECATED_BEGIN
   sdf::URDF2SDF parser_;
   SDF_SUPPRESS_DEPRECATED_END
-  TiXmlDocument sdf_result = parser_.InitModelDoc(&doc);
-  TiXmlElement *sdf = sdf_result.FirstChildElement("sdf");
+  tinyxml2::XMLDocument sdf_result = parser_.InitModelDoc(&doc);
+  tinyxml2::XMLElement *sdf = sdf_result.FirstChildElement("sdf");
   ASSERT_NE(nullptr, sdf);
-  TiXmlElement *model = sdf->FirstChildElement("model");
+  tinyxml2::XMLElement *model = sdf->FirstChildElement("model");
   ASSERT_NE(nullptr, model);
-  TiXmlElement *pose = model->FirstChildElement("pose");
+  tinyxml2::XMLElement *pose = model->FirstChildElement("pose");
   ASSERT_NE(nullptr, pose);
 }
 
@@ -135,17 +135,17 @@ TEST(URDFParser, ParseRobotOriginRPYBlank)
          << "  <origin xyz=\"0 0 0\"/>"
          << "  <link name=\"link\" />"
          << "</robot>";
-  TiXmlDocument doc;
+  tinyxml2::XMLDocument doc;
   SDF_SUPPRESS_DEPRECATED_BEGIN
   sdf::URDF2SDF parser_;
   SDF_SUPPRESS_DEPRECATED_END
   doc.Parse(stream.str().c_str());
-  TiXmlDocument sdf_result = parser_.InitModelDoc(&doc);
-  TiXmlElement *sdf = sdf_result.FirstChildElement("sdf");
+  tinyxml2::XMLDocument sdf_result = parser_.InitModelDoc(&doc);
+  tinyxml2::XMLElement *sdf = sdf_result.FirstChildElement("sdf");
   ASSERT_NE(nullptr, sdf);
-  TiXmlElement *model = sdf->FirstChildElement("model");
+  tinyxml2::XMLElement *model = sdf->FirstChildElement("model");
   ASSERT_NE(nullptr, model);
-  TiXmlElement *pose = model->FirstChildElement("pose");
+  tinyxml2::XMLElement *pose = model->FirstChildElement("pose");
   ASSERT_NE(nullptr, pose);
 }
 
@@ -170,7 +170,7 @@ TEST(URDFParser, ParseRobotMaterialBlank)
          << "    <mu1>0.2</mu1>"
          << "  </gazebo>"
          << "</robot>";
-  TiXmlDocument doc;
+  tinyxml2::XMLDocument doc;
   doc.Parse(stream.str().c_str());
   SDF_SUPPRESS_DEPRECATED_BEGIN
   sdf::URDF2SDF parser;
@@ -210,7 +210,7 @@ TEST(URDFParser, ParseRobotMaterialName)
          << "    <material>Gazebo/Orange</material>"
          << "  </gazebo>"
          << "</robot>";
-  TiXmlDocument doc;
+  tinyxml2::XMLDocument doc;
   doc.Parse(stream.str().c_str());
   SDF_SUPPRESS_DEPRECATED_BEGIN
   sdf::URDF2SDF parser;
@@ -246,17 +246,17 @@ TEST(URDFParser, ParseRobotOriginInvalidXYZ)
          << "  <origin xyz=\"0 foo 0\" rpy=\"0 0 0\"/>"
          << "  <link name=\"link\" />"
          << "</robot>";
-  TiXmlDocument doc;
+  tinyxml2::XMLDocument doc;
   SDF_SUPPRESS_DEPRECATED_BEGIN
   sdf::URDF2SDF parser_;
   SDF_SUPPRESS_DEPRECATED_END
   doc.Parse(stream.str().c_str());
-  TiXmlDocument sdf_result = parser_.InitModelDoc(&doc);
-  TiXmlElement *sdf = sdf_result.FirstChildElement("sdf");
+  tinyxml2::XMLDocument sdf_result = parser_.InitModelDoc(&doc);
+  tinyxml2::XMLElement *sdf = sdf_result.FirstChildElement("sdf");
   ASSERT_NE(nullptr, sdf);
-  TiXmlElement *model = sdf->FirstChildElement("model");
+  tinyxml2::XMLElement *model = sdf->FirstChildElement("model");
   ASSERT_NE(nullptr, model);
-  TiXmlElement *pose = model->FirstChildElement("pose");
+  tinyxml2::XMLElement *pose = model->FirstChildElement("pose");
   ASSERT_NE(nullptr, pose);
 }
 
@@ -309,14 +309,14 @@ TEST(URDFParser, ParseGazeboLinkFactors)
            << "  </gazebo>"
            << "</robot>";
 
-    TiXmlDocument doc;
+    tinyxml2::XMLDocument doc;
     SDF_SUPPRESS_DEPRECATED_BEGIN
     sdf::URDF2SDF parser_;
     SDF_SUPPRESS_DEPRECATED_END
     doc.Parse(stream.str().c_str());
-    TiXmlDocument sdf_result = parser_.InitModelDoc(&doc);
+    tinyxml2::XMLDocument sdf_result = parser_.InitModelDoc(&doc);
 
-    TiXmlElement *tmp = sdf_result.FirstChildElement("sdf");
+    tinyxml2::XMLElement *tmp = sdf_result.FirstChildElement("sdf");
     ASSERT_NE(nullptr, tmp);
 
     unsigned int i;
@@ -347,12 +347,12 @@ TEST(URDFParser, ParseGazeboInvalidDampingFactor)
          << "    <dampingFactor>foo</dampingFactor>"
          << "  </gazebo>"
          << "</robot>";
-  TiXmlDocument doc;
+  tinyxml2::XMLDocument doc;
   SDF_SUPPRESS_DEPRECATED_BEGIN
   sdf::URDF2SDF parser_;
   SDF_SUPPRESS_DEPRECATED_END
   doc.Parse(stream.str().c_str());
-  ASSERT_THROW(TiXmlDocument sdf_result = parser_.InitModelDoc(&doc),
+  ASSERT_THROW(tinyxml2::XMLDocument sdf_result = parser_.InitModelDoc(&doc),
                std::invalid_argument);
 }
 
@@ -418,14 +418,14 @@ TEST(URDFParser, ParseGazeboJointElements)
            << "  </gazebo>"
            << "</robot>";
 
-    TiXmlDocument doc;
+    tinyxml2::XMLDocument doc;
     SDF_SUPPRESS_DEPRECATED_BEGIN
     sdf::URDF2SDF parser_;
     SDF_SUPPRESS_DEPRECATED_END
     doc.Parse(stream.str().c_str());
-    TiXmlDocument sdf_result = parser_.InitModelDoc(&doc);
+    tinyxml2::XMLDocument sdf_result = parser_.InitModelDoc(&doc);
 
-    TiXmlElement *tmp = sdf_result.FirstChildElement("sdf");
+    tinyxml2::XMLElement *tmp = sdf_result.FirstChildElement("sdf");
     ASSERT_NE(nullptr, tmp);
 
     unsigned int i;
@@ -810,7 +810,7 @@ TEST(URDFParser, OutputPrecision)
   SDF_SUPPRESS_DEPRECATED_BEGIN
   sdf::URDF2SDF parser;
   SDF_SUPPRESS_DEPRECATED_END
-  TiXmlDocument sdfResult = parser.InitModelString(str);
+  tinyxml2::XMLDocument sdfResult = parser.InitModelString(str);
 
   auto root = sdfResult.RootElement();
   auto model = root->FirstChild("model");
