@@ -61,6 +61,7 @@ set (sources
   Utils.cc
   Visual.cc
   World.cc
+  XmlUtils.cc
 )
 
 if (USE_INTERNAL_URDF)
