@@ -474,7 +474,9 @@ bool readStringInternal(const std::string &_xmlString, SDFPtr _sdf,
     SDF_SUPPRESS_DEPRECATED_BEGIN
     URDF2SDF u2g;
     SDF_SUPPRESS_DEPRECATED_END
-    tinyxml2::XMLDocument doc = u2g.InitModelString(_xmlString);
+    tinyxml2::XMLDocument doc;
+    u2g.InitModelString(&doc, _xmlString);
+
     if (sdf::readDoc(&doc, _sdf, "urdf string", _convert, _errors))
     {
       sdfdbg << "Parsing from urdf.\n";
